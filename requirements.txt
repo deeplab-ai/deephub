@@ -1,6 +1,6 @@
 ujson==1.35
 Fabric==1.12.0
-requests==2.18.4
+requests==2.20.0
 numpy
 scipy
 scikit-learn
