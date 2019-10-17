@@ -81,7 +81,7 @@ class EstimatorModel(ModelBase):
             raise ValueError("global_step is required for cyclical_learning_rate.")
         if max_lr <= min_lr:
             raise ValueError("min_lr must be smaller than max_lr.")
-        with tf.name_scope("CyclicLearningRate"):
+        with tf.name_scope("CyclicalLearningRate"):
             min_lr = tf.convert_to_tensor(min_lr, name="learning_rate")
             global_step = tf.cast(global_step, tf.float32)
             cycle_size_steps = tf.cast(cycle_size_steps, tf.float32)
