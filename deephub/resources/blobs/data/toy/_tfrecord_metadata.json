@@ -1,0 +1,15 @@
+{
+    "version": 1,
+    "files": {
+        "train-00000-of-00001": {
+            "total_records": 10,
+            "file_size": 350,
+            "md5_hash": "3c8c216b7293fdef623b04e01bb5878a"
+        },
+        "validation-00000-of-00001": {
+            "total_records": 10,
+            "file_size": 350,
+            "md5_hash": "fdebe01f545d90f127a15ea2f28d3d1d"
+        }
+    }
+}

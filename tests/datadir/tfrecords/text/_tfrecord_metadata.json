@@ -1,0 +1,10 @@
+{
+    "version": 1,
+    "files": {
+        "train_char.tfr": {
+            "total_records": 8,
+            "file_size": 8616,
+            "md5_hash": "e19c61e2402af624e5754b27ea96992a"
+        }
+    }
+}

@@ -1,3 +1,4 @@
+# Taken from: https://raw.githubusercontent.com/github/gitignore/master/Python.gitignore
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -72,6 +73,10 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# IPython
+profile_default/
+ipython_config.py
+
 # pyenv
 .python-version
 
@@ -102,3 +107,34 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.dmypy.json
+dmypy.json
+
+# IDE specific
+.idea/
+
+# Virtual environment
+venv*/
+env*/
+
+### Project specific
+/mobile/ios/tflite/camera/data/*.txt
+/mobile/ios/tflite/camera/data/*.tflite
+/mobile/ios/tflite/simple/data/*.txt
+/mobile/ios/tflite/simple/data/*.tflite
+/mobile/ios/camera/data/*.txt
+/mobile/ios/camera/data/*.pb
+/mobile/ios/my_camera/data/*.txt
+/mobile/ios/my_camera/data/*.pb
+xcuserdata/**
+MANIFEST
+
+deep_research/inference/convertor_tests/*
+!deep_research/inference/convertor_tests/grace_hopper.jpg
+net_output/
+test-reports/
+runtime_resources/
+/hyper_parameter_search
+
+# GS credentials at docker image build time
+gs_service_account.json

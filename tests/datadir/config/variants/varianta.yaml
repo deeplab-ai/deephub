@@ -1,0 +1,17 @@
+model:
+  type: 'mymodule:ModelA'
+  learning_rate: 0.001
+  loss_type: "cross_entropy"
+train:
+  epochs: 30
+  save_summary_steps: 15
+  train_feeder:
+    tokenizer: algo2
+    nested_params:
+      paramb: 2
+  eval_feeder:
+    type: 'CustomEvalFeeder'
+    nested_params2:
+      unknown_param: 2
+extend:
+  - ../feeders/text_feeder.yaml

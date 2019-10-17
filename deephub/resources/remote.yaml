@@ -1,0 +1,10 @@
+resources:
+  - name: 'inception'
+    dst_path: 'pretrained_models/slim_inception_pretrained/inception_v3.ckpt'
+    gs_url: 'gs://deeplab/pretrained_models/slim_inception_pretrained/inception_v3.ckpt'
+  - name: 'toy_data'
+    dst_path: 'data/'
+    gs_url: 'gs://deeplab/deep_resources/toy_data'
+  - name: 'facenet'
+    dst_path: 'models/facenet/'
+    gs_url: 'gs://deeplab/deep_resources/models/facenet'

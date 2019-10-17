@@ -1,0 +1,6 @@
+train:
+  train_feeder:
+    type: 'TextFeeder'
+    tokenizer: algo1
+    nested_params:
+      parama: 1

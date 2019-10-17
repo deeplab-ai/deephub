@@ -1,0 +1,6 @@
+model:
+  type: "modulea:ModelA"
+train:
+  epochs: 40
+extend:
+  - ../feeders/image_feeder.yaml

@@ -1,0 +1,14 @@
+model:
+  type: 'toy:DebugToyModel'
+  num_classes: 100
+  learning_rate: 0.001
+  hidden_neurons: 50
+train:
+  epochs: 10
+  save_checkpoint_steps: 100
+#      save_checkpoint_secs: 1
+  validation_secs: 3600
+  save_summary_steps: 1
+extend:
+  - ../feeders/feeder_toy_train.yaml
+  - ../feeders/feeder_toy_eval.yaml

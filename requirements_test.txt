@@ -1,0 +1,4 @@
+pytest>=3.0.2
+pytest-logging==2015.11.4
+mock~=2.0.0
+nltk~=3.3.0

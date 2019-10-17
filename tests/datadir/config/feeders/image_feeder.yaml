@@ -1,0 +1,12 @@
+image_feeder:
+  type: 'MyFeeder'
+  labels_map:
+    image/class/label_0:
+      type: FixedLenFeature
+      shape: [1]
+      dtype: int64
+  features_map:
+    image/encoded_0:
+      type: ImageFeature
+      resize_width: 180
+      resize_height: 180

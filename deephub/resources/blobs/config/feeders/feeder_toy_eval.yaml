@@ -1,0 +1,17 @@
+train:
+  eval_feeder:
+    type: 'TFRecordExamplesFeeder'
+    batch_size: 10
+    shuffle: False
+    file_patterns: ['']
+    max_examples: -1
+    labels_map:
+      number:
+        type: FixedLenFeature
+        shape: [1]
+        dtype: int64
+    features_map:
+      number:
+        type: FixedLenFeature
+        shape: [1]
+        dtype: int64
