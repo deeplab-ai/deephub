@@ -124,6 +124,8 @@ def load_resources_from_yaml(filepath=None):
     """
     if filepath is None:
         filepath = Path(__file__).parent / 'remote.yaml'
+    elif not os.path.exists(filepath):
+        raise ("The specified filepath doen't exist")
 
     if os.path.exists(filepath):
         logger.debug(f"Loading remote resources configuration from '{filepath}'")
