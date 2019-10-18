@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from functools import partial
 import yaml
+import os
 
 from deephub.common.logging import context_log
 from deephub.common.gsutil import download_file, download_directory, recursive_size
@@ -124,12 +125,15 @@ def load_resources_from_yaml(filepath=None):
     if filepath is None:
         filepath = Path(__file__).parent / 'remote.yaml'
 
-    logger.debug(f"Loading remote resources configuration from '{filepath}'")
-    with open(str(filepath), 'rt') as f:
-        remote_resources = yaml.load(f)
+    if os.path.exists(filepath):
+        logger.debug(f"Loading remote resources configuration from '{filepath}'")
+        with open(str(filepath), 'rt') as f:
+            remote_resources = yaml.load(f)
 
-    for resource in remote_resources['resources']:
-        register_remote_resource(**resource)
+        for resource in remote_resources['resources']:
+            register_remote_resource(**resource)
+    else:
+        logger.warning("The resources config file ({}) does not exists.".format(filepath))
 
 
 # Load all resources from external file
