@@ -1,17 +1,18 @@
 train:
   train_feeder:
-    type: 'TFRecordExamplesFeeder'
+    module_path: 'deephub.models.feeders.tfrecords'
+    class_type: 'TFRecordExamplesFeeder'
     batch_size: 10
     shuffle: False
     file_patterns: ['']
     max_examples: -1
     labels_map:
       number:
-        type: FixedLenFeature
+        class_type: FixedLenFeature
         shape: [1]
         dtype: int64
     features_map:
       number:
-        type: FixedLenFeature
+        class_type: FixedLenFeature
         shape: [1]
         dtype: int64

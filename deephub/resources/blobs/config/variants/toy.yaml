@@ -1,5 +1,6 @@
 model:
-  type: 'toy:DebugToyModel'
+  module_path: "deephub.models.registry.toy"
+  class_type: 'DebugToyModel'
   num_classes: 100
   learning_rate: 0.001
   hidden_neurons: 50

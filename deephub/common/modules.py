@@ -88,7 +88,7 @@ def import_object(object_path: str, search_modules: Optional[List[str]] = None) 
 def instantiate_from_dict(params: Dict[str, Any],
                           search_modules: Optional[List[str]] = None,
                           exclude_keys: Optional[List] = None,
-                          class_name_key: str = 'type') -> Any:
+                          class_name_key: str = 'class_type') -> Any:
     """
     Instantiate a class that was described in a dictionary format.
 
