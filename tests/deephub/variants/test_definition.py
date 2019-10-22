@@ -10,13 +10,15 @@ from deephub.variants.definition import VariantDefinition
 class TestVariantDefinition:
     VARIANT_DEF_A = {
         'model': {
-            'type': 'something',
+            'module_path': 'somePath',
+            'class_type': 'something',
             'foo': '1'
         },
         'train': {
             'epochs': 100,
             'train_feeder': {
-                'type': 'SomeFeedder',
+                'module_path': 'somePathFeeder',
+                'class_type': 'SomeFeedder',
                 'files': 'something'
             }
         }
@@ -197,11 +199,12 @@ class TestVariantDefinition:
             model = prod_a.create_model()
 
             mocked_instantiated.assert_called_with({
-                'type': 'something',
+                'module_path': 'somePath',
+                'class_type': 'something',
                 'foo': '1',
                 'model_dir': str(tmpdir / 'VARIANT_DEF_A')
             },
-                search_modules=['deephub.models.registry'])
+            search_modules=['somePath'])
 
     def test_create_feeder(self, tmpdir):
         self.VARIANT_DEF_A['model']['model_dir'] = str(tmpdir / 'VARIANT_DEF_A')
@@ -215,12 +218,12 @@ class TestVariantDefinition:
 
             mocked_instantiated.assert_called_with(
                 {
-                    'type': 'SomeFeedder',
+                    'module_path': 'somePathFeeder',
+                    'class_type': 'SomeFeedder',
                     'files': 'something'
                 },
-                exclude_keys=['model_dir'],
-                search_modules=['deephub.models.registry',
-                                'deephub.models.feeders'])
+                exclude_keys=['model_dir', 'module_path'],
+                search_modules=['somePathFeeder'])
 
     def test_create_feeder_unknwon(self, tmpdir):
         self.VARIANT_DEF_A['model']['model_dir'] = str(tmpdir / 'VARIANT_DEF_A')
@@ -235,18 +238,21 @@ class TestVariantDefinition:
     def test_export_to_yaml(self, tmpdir):
         variant_def = {
             'model': {
-                'type': 'toy:DebugToyModel',
+                'module_path': 'deephub.models.registry.toy',
+                'class_type': 'DebugToyModel',
                 'model_dir': str(tmpdir / 'test_exported_yaml')
             },
             'train': {
                 'epochs': 1,
                 'train_feeder': {
-                    'type': 'MemorySamplesFeeder',
+                    'module_path': 'deephub.models.feeders',
+                    'class_type': 'MemorySamplesFeeder',
                     'x': {'features': [[1, 1], [1, 1]]},
                     'y': {'labels': [1, 1]}
                 },
                 'eval_feeder': {
-                    'type': 'MemorySamplesFeeder',
+                    'module_path': 'deephub.models.feeders',
+                    'class_type': 'MemorySamplesFeeder',
                     'x': {'features': [[1, 1], [1, 1]]},
                     'y': {'labels': [1, 1]}
                 }

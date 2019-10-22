@@ -128,7 +128,7 @@ class VariantDefinition:
         :return: The instantiated Model object
         """
         model = instantiate_from_dict(self.get('model'),
-                                      search_modules=['deephub.models.registry'])
+                                      search_modules=[self.get('model.module_path')])
         if not isinstance(model, ModelBase):
             logger.warn(f"Class '{model.__class__.__name__}' that is used as model type is not subclass of ModelBase.")
         return model
@@ -144,11 +144,14 @@ class VariantDefinition:
         :return: The instantiated Feeder object
         """
 
-        feeder = instantiate_from_dict(self.get(feeder_config_path),
-                                       search_modules=[
-                                           'deephub.models.registry',
-                                           'deephub.models.feeders'],
-                                       exclude_keys=['model_dir'])
+        feeder = instantiate_from_dict(
+            self.get(feeder_config_path),
+            search_modules=[self.get('train.train_feeder.module_path')]
+                            if self.has('train')
+                            else [self.get('train.eval_feeder.module_path')],
+            exclude_keys=['model_dir', 'module_path']
+        )
+
         if not isinstance(feeder, FeederBase):
             logger.warn(f"Class '{feeder.__class__.__name__}' that is used as feeder "
                         f"type is not subclass of FeederBase.")

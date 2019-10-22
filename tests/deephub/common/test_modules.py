@@ -65,7 +65,7 @@ class TestInstantiateFromDict:
 
     def test_simple_scenario(self):
         dt = instantiate_from_dict({
-            'type': 'datetime:datetime',
+            'class_type': 'datetime:datetime',
             'year': 2018,
             'month': 9,
             'day': 8,
@@ -79,7 +79,7 @@ class TestInstantiateFromDict:
         with pytest.raises(ValueError):
             instantiate_from_dict(
                 {
-                    'type': 'datetime',
+                    'class_type': 'datetime',
                     'year': 2018,
                     'month': 9,
                     'day': 8,
@@ -88,7 +88,7 @@ class TestInstantiateFromDict:
         with pytest.raises(ObjectNotFoundError):
             instantiate_from_dict(
                 {
-                    'type': 'datetime',
+                    'class_type': 'datetime',
                     'year': 2018,
                     'month': 9,
                     'day': 8,
@@ -97,7 +97,7 @@ class TestInstantiateFromDict:
 
         dt = instantiate_from_dict(
             {
-                'type': 'datetime',
+                'class_type': 'datetime',
                 'year': 2018,
                 'month': 9,
                 'day': 8,
@@ -110,7 +110,7 @@ class TestInstantiateFromDict:
         with pytest.raises(InstantiationError):
             instantiate_from_dict(
                 {
-                    'type': 'datetime:datetime',
+                    'class_type': 'datetime:datetime',
                     'year': 2018,
                     'month': 9,
                     'day': 8,
@@ -119,7 +119,7 @@ class TestInstantiateFromDict:
 
         instantiate_from_dict(
             {
-                'type': 'datetime:datetime',
+                'class_type': 'datetime:datetime',
                 'year': 2018,
                 'month': 9,
                 'day': 8,
