@@ -147,8 +147,7 @@ class VariantDefinition:
         feeder = instantiate_from_dict(
             self.get(feeder_config_path),
             search_modules=[self.get('train.train_feeder.module_path')]
-                            if self.has('train')
-                            else [self.get('train.eval_feeder.module_path')],
+            if self.has('train') else [self.get('train.eval_feeder.module_path')],
             exclude_keys=['model_dir', 'module_path']
         )
 
