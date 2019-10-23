@@ -222,7 +222,7 @@ class TestVariantDefinition:
                     'class_type': 'SomeFeedder',
                     'files': 'something'
                 },
-                exclude_keys=['model_dir', 'module_path'],
+                exclude_keys=['model_dir', 'module_path', 'class_type'],
                 search_modules=['somePathFeeder'])
 
     def test_create_feeder_unknwon(self, tmpdir):
