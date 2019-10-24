@@ -99,9 +99,9 @@ class TFRecordExamplesFeeder(FeederBase):
 
         self.shuffle_buffer_size = min(shuffle_buffer_size, self.total_examples)
 
-        self.features_map = self._construct_features_map(features_map)
+        self.features_map = self._construct_features_map(features_map=features_map)
         if labels_map is not None:
-            self.labels_map = self._construct_features_map(labels_map)
+            self.labels_map = self._construct_features_map(features_map=labels_map)
         else:
             self.labels_map = None
 
@@ -161,12 +161,17 @@ class TFRecordExamplesFeeder(FeederBase):
         The reconstruction process is similar to reconstruction followed by variant definition for
         Model and Feeders
 
-        :param features_map: Example features or dictionary with their definitions mapped in
-            unique key.
+        :param features_map: Example features or dictionary with their definitions mapped in unique key.
         :return: The example feature objects mapped in their key, preserving the same order as in `features_map`
         """
 
         features_map_objects = {}
+
+        if 'module_path' not in features_map:
+            module_path = 'tensorflow'
+        else:
+            module_path = features_map['module_path']
+            del (features_map['module_path'])
 
         for fname, fmap in features_map.items():
 
@@ -176,12 +181,10 @@ class TFRecordExamplesFeeder(FeederBase):
 
             features_map_objects[fname] = instantiate_from_dict(
                 fmap,
-                search_modules=['tensorflow',
-                                'deephub.models.feeders',
-                                'deephub.models.feeders.tfrecords.features',
-                                'deephub.models.registry'])
+                search_modules=[module_path])
 
-        return features_map_objects
+        result = features_map_objects
+        return result
 
     def _parse_example(self, raw_record: tf.Tensor) -> Union[Tuple[Dict[str, tf.Tensor], Dict[str, tf.Tensor]],
                                                              Dict[str, tf.Tensor]]:

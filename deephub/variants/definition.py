@@ -148,7 +148,7 @@ class VariantDefinition:
             self.get(feeder_config_path),
             search_modules=[self.get('train.train_feeder.module_path')]
             if self.has('train') else [self.get('train.eval_feeder.module_path')],
-            exclude_keys=['model_dir', 'module_path']
+            exclude_keys=['model_dir', 'module_path', 'class_type']
         )
 
         if not isinstance(feeder, FeederBase):
