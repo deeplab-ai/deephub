@@ -1,20 +1,20 @@
 import logging
+import multiprocessing
+from functools import lru_cache
 from pathlib import Path
 from typing import Union, Optional, List, Dict, NamedTuple, Tuple
-from functools import lru_cache
-import multiprocessing
 
-import tensorflow as tf
 import numpy as np
-
-from deephub.common.modules import instantiate_from_dict
+import tensorflow as tf
 from deephub.common.io import AnyPathType
-from deephub.common.utils import merge_dictionaries
 from deephub.common.io import resolve_glob_pattern
-from .features import FeatureTypeBase
-from ..base import FeederBase, InputFN
-from .meta import get_fileinfo, generate_fileinfo
+from deephub.common.modules import instantiate_from_dict
+from deephub.common.utils import merge_dictionaries
+import json
 
+from .features import FeatureTypeBase
+from .meta import get_fileinfo, generate_fileinfo
+from ..base import FeederBase, InputFN
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +37,7 @@ class TFRecordExamplesFeeder(FeederBase):
                  features_map: Dict[str, Union[NamedTuple, FeatureTypeBase]],
                  max_examples: int = -1,
                  labels_map: Optional[Dict[str, Union[NamedTuple, FeatureTypeBase]]] = None,
+                 std_scale_metadata_fpath: str = None,
                  batch_size: int = 128,
                  drop_remainder: bool = False,
                  shuffle: bool = False,
@@ -110,6 +111,7 @@ class TFRecordExamplesFeeder(FeederBase):
         self.num_parallel_maps = num_parallel_maps
         self.prefetch = prefetch
         self.drop_remainder = drop_remainder
+        self.std_scale_metadata_fpath = std_scale_metadata_fpath
 
     @property
     @lru_cache()
@@ -134,7 +136,7 @@ class TFRecordExamplesFeeder(FeederBase):
         total_examples = sum(
             info_f(fpath).total_records
             for fpath in self.file_paths
-            )
+        )
 
         if self.max_examples > total_examples:
             raise ValueError("Feeder input max_examples({}) is greater than the "
@@ -186,13 +188,28 @@ class TFRecordExamplesFeeder(FeederBase):
         result = features_map_objects
         return result
 
-    def _parse_example(self, raw_record: tf.Tensor) -> Union[Tuple[Dict[str, tf.Tensor], Dict[str, tf.Tensor]],
-                                                             Dict[str, tf.Tensor]]:
+    def _parse_example(self, raw_record: tf.Tensor) -> Union[
+        Tuple[Dict[str, tf.Tensor], Dict[str, tf.Tensor]],
+        Dict[str, tf.Tensor]]:
         """
         Parse a single example and return a tuple with features and labels mapped by their key name
 
         :param raw_record: The raw tf_record as extracted from the stream
         """
+
+        # Check if std scale should be performed
+        if self.std_scale_metadata_fpath is not None:
+            with open(self.std_scale_metadata_fpath) as json_file:
+                stats = json.load(json_file)
+                _mean = stats['mean']
+                _std = stats['std']
+                print(f'mean:{_mean}')
+                mean = tf.convert_to_tensor(_mean, dtype=tf.float32)
+                std = tf.convert_to_tensor(_std, dtype=tf.float32)
+        else:
+            mean = tf.constant(0.0)
+            std = tf.constant(1.0)
+
         if self.labels_map is not None:
             example_features = merge_dictionaries(self.features_map, self.labels_map)
         else:
@@ -214,6 +231,10 @@ class TFRecordExamplesFeeder(FeederBase):
         for name, custom_feature in custom_features.items():
             example[name] = custom_feature.post_parse_op(example[name])
 
+        for key in self.features_map.keys():
+            if key == "timeseries":
+                example[key] = (example[key] - mean)/std
+
         if self.labels_map is not None:
             return (
                 {key: example[key] for key in self.features_map.keys()},
@@ -230,8 +251,9 @@ class TFRecordExamplesFeeder(FeederBase):
                                                       num_parallel_reads=self.num_parallel_reads)
             else:
                 raw_records = tf.data.TFRecordDataset(list(map(str, self.file_paths)),
-                                                      num_parallel_reads=self.num_parallel_reads).\
+                                                      num_parallel_reads=self.num_parallel_reads). \
                     take(count=self.total_examples)
+
 
             examples = raw_records.map(self._parse_example,
                                        num_parallel_calls=self.num_parallel_maps)

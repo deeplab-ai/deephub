@@ -1,12 +1,12 @@
-from pathlib import Path
-from typing import Dict, Any
 import json
 import logging
+from pathlib import Path
+from typing import Dict, Any
 
 import attr
 import tensorflow as tf
-
 from deephub.common.io import file_md5
+from runstats import Statistics
 
 METADATA_FILENAME = '_tfrecord_metadata.json'
 CURRENT_VERSION = 1
@@ -209,7 +209,7 @@ def generate_fileinfo(fpath: Path, always_regenerate: bool = False) -> TFRecordF
     """
     Generate file info for a file if it does not exist.
     :param fpath: The path of the filename to generate info
-    :param always_regenerate: If true it will regenerate info even if they file seems unchanged.
+    :param always_regenerate: If true it will regenerate info even if the file seems unchanged.
     :return The new info of the file
     """
 
