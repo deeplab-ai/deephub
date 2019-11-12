@@ -249,6 +249,24 @@ class TFRecordExamplesFeeder(FeederBase):
 
         return _input_fn
 
+    def get_tf_dataset(self, epochs: Optional[int] = None) -> tf.data.Dataset:
+        if self.max_examples == -1:
+            raw_records = tf.data.TFRecordDataset(list(map(str, self.file_paths)),
+                                                  num_parallel_reads=self.num_parallel_reads)
+        else:
+            raw_records = tf.data.TFRecordDataset(list(map(str, self.file_paths)),
+                                                  num_parallel_reads=self.num_parallel_reads). \
+                take(count=self.total_examples)
+        examples = raw_records.map(self._parse_example, num_parallel_calls=self.num_parallel_maps)
+        if self.shuffle:
+            examples = examples.apply(tf.data.experimental.shuffle_and_repeat(
+                buffer_size=self.shuffle_buffer_size, count=1))
+        else:
+            examples = examples.repeat(count=epochs)
+        batches = examples.batch(batch_size=self.batch_size, drop_remainder=self.drop_remainder)
+        # buffer_size=None is autotuning the appropriate prefetching buffer size
+        return batches.prefetch(buffer_size=self.prefetch)
+
     def total_steps(self, epochs: int) -> Optional[int]:
         if self.total_examples is None:
             return None
