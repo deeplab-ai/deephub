@@ -143,11 +143,19 @@ class VariantDefinition:
 
         :return: The instantiated Feeder object
         """
+        if self.has('train.train_feeder'):
+            search_modules = [self.get('train.train_feeder.module_path')]
+        elif self.has('train.eval_feeder'):
+            search_modules = [self.get('train.eval_feeder.module_path')]
+        elif self.has('predict.predict_feeder'):
+            search_modules = [self.get('predict.predict_feeder')]
+        else:
+            raise ValueError('Variant must have one of the following: \n ' +
+                             'train.train_feeder, train.eval_feeder, predict.predict_feeder')
 
         feeder = instantiate_from_dict(
             self.get(feeder_config_path),
-            search_modules=[self.get('train.train_feeder.module_path')]
-            if self.has('train') else [self.get('train.eval_feeder.module_path')],
+            search_modules=search_modules,
             exclude_keys=['model_dir', 'module_path', 'class_type']
         )
 
