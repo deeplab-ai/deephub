@@ -39,7 +39,7 @@ class TFRecordExamplesFeeder(FeederBase):
                  labels_map: Optional[Dict[str, Union[NamedTuple, FeatureTypeBase]]] = None,
                  batch_size: int = 128,
                  drop_remainder: bool = False,
-                 shuffle: bool = False,
+                 shuffle: bool = True,
                  shuffle_buffer_size: Optional[int] = 10000,
                  num_parallel_maps: Optional[int] = None,
                  num_parallel_reads: Optional[int] = 32,

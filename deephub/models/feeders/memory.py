@@ -57,7 +57,7 @@ class MemorySamplesFeeder(FeederBase):
                  feed_as_dict: bool = True,
                  batch_size: int = 128,
                  drop_remainder: bool = False,
-                 shuffle: bool = False):
+                 shuffle: bool = True):
         """
         Initialize in-memory feeder
         :param x: The x value that will be used for features in the model. It can be a dictionary of columns
