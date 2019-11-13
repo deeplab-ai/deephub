@@ -239,8 +239,7 @@ class TFRecordExamplesFeeder(FeederBase):
                 take(count=self.total_examples)
         examples = raw_records.map(self._parse_example, num_parallel_calls=self.num_parallel_maps)
         if self.shuffle:
-            examples = examples.apply(tf.data.experimental.shuffle_and_repeat(
-                buffer_size=self.shuffle_buffer_size, count=1))
+            examples = examples.shuffle(self.shuffle_buffer_size, reshuffle_each_iteration=True).repeat(count=epochs)
         else:
             examples = examples.repeat(count=epochs)
         batches = examples.batch(batch_size=self.batch_size, drop_remainder=self.drop_remainder)

@@ -280,7 +280,8 @@ class TestMemorySamplesFeeder:
             x=x,
             y=y,
             batch_size=1,
-            feed_as_dict=False
+            feed_as_dict=False,
+            shuffle=False
         )
 
         input_fn = feeder.get_input_fn(1)
@@ -297,7 +298,8 @@ class TestMemorySamplesFeeder:
             x=x,
             y=y,
             batch_size=1,
-            feed_as_dict=True
+            feed_as_dict=True,
+            shuffle=False
         )
 
         input_fn = feeder.get_input_fn(1)
@@ -319,7 +321,8 @@ class TestMemorySamplesFeeder:
             x=x,
             y=y,
             batch_size=2,
-            feed_as_dict=False
+            feed_as_dict=False,
+            shuffle=False
         )
         input_fn = feeder.get_input_fn(1)
         results = read_iterator(input_fn().make_one_shot_iterator())
@@ -335,7 +338,8 @@ class TestMemorySamplesFeeder:
             x=x,
             y=y,
             batch_size=10,
-            feed_as_dict=False
+            feed_as_dict=False,
+            shuffle=False
         )
 
         input_fn = feeder.get_input_fn(5)
@@ -513,6 +517,6 @@ class TestMemorySamplesFeeder:
         x = np.arange(0, 100)
         y = np.arange(1000, 1100)
 
-        res = repr(MemorySamplesFeeder(x=x, y=y, batch_size=16))
+        res = repr(MemorySamplesFeeder(x=x, y=y, batch_size=16, shuffle=False))
         assert res == "MemorySamplesFeeder(x=(100, 1), y=(100, 1), batch_size=16, " \
                       "shuffle=False, as_dict=True)"
