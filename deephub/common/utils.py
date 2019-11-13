@@ -6,6 +6,7 @@ import re
 from typing import Dict
 
 import pandas as pd
+from hashlib import sha256
 
 NAMES_TO_CONVERT_TO_STRING = ['item_id']
 SOME_CHAR = '#'
@@ -129,3 +130,13 @@ def deep_update_dict(first: Dict, other: Dict) -> Dict:
         first[k] = v
 
     return first
+
+
+def hash_from_dict(d: Dict) -> str:
+    """
+    Generate a unique hash in hex format from a dictionary
+    :param d: The dictionary to generate hash from.
+    :return A sh256 hash in hex format
+    """
+    payload = "|".join(f"{k}={v}" for k, v in d.items())
+    return sha256(payload.encode()).hexdigest()

@@ -1,0 +1,28 @@
+goal: MINIMIZE
+metric: "loss"
+max_trials: 100
+#trial_id_argument: output_folder
+objective:
+  type: MODULE_CALL
+  module: hpt.call_variant
+  function: train_and_get_score
+params:
+  learning_rate:
+    type: REAL
+    min: 0.00001
+    max: 0.1
+  epochs:
+    type: INTEGER
+    constant: 10
+  hidden_neurons:
+    type: CATEGORICAL
+    choices: [16,32,64]
+fixed_model_params:
+  variant_name: toy
+  variant_path: "/Users/gpan/PycharmProjects/deephub/deephub/resources/blobs/config/variants/"
+  model_dir: "../../toy1/"
+fixed_train_params:
+  train_feeder:
+    file_patterns: "/Users/gpan/PycharmProjects/deephub/deephub/resources/blobs/data/toy/train*"
+  eval_feeder:
+    file_patterns: "/Users/gpan/PycharmProjects/deephub/deephub/resources/blobs/data/toy/validation*"
