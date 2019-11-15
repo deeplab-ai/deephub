@@ -47,7 +47,15 @@ def run(hpt_fname, extra_expr_params):
         min: 0.00001
         max: 0.001
         scale: LOG
-    fixed_model_params: # model_params used
+    fixed_model_params:
+          variant_name: toy
+          variant_path: path/to/toy model variant
+          model_dir: path/to/dir
+    fixed_train_params:
+        train_feeder:
+            file_patterns: path/to/data #deephub/deephub/resources/blobs/data/toy/train*
+        eval_feeder:
+            file_patterns: path to deephub/deephub/resources/blobs/data/toy/validation*
 
 
     """
