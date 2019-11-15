@@ -34,7 +34,7 @@ def run(hpt_fname, extra_expr_params):
       type: MODULE_CALL
       module: deviceid.variants.triplet_loss_n_cluster
       function: train
-    params:
+    params:  # params to be tuned
       epochs:
         type: INTEGER
         constant: 1
@@ -47,6 +47,8 @@ def run(hpt_fname, extra_expr_params):
         min: 0.00001
         max: 0.001
         scale: LOG
+    fixed_model_params: # model_params used
+
 
     """
     yaml_variables = load_yaml(hpt_fname)
@@ -68,3 +70,4 @@ def run(hpt_fname, extra_expr_params):
 if __name__ == '__main__':
     cli()
     # run()
+
