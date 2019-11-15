@@ -3,6 +3,7 @@ import logging
 from functools import reduce
 from itertools import groupby
 from typing import Dict, Union, Optional, Tuple
+import os
 
 import tensorflow as tf
 
@@ -102,3 +103,17 @@ def _export_last_step_event_metrics_to_csv(train_events_file_path: str,
         writer.writerow(train_summary)
         if validation_summary:
             writer.writerow(validation_summary)
+
+
+def get_metrics_from_tensorboard(model_dir):
+    # Parse events out tensorboard files
+    events_out_files = [os.path.join(model_dir, 'eval', x) for x in os.listdir(os.path.join(model_dir, 'eval'))]
+    metrics_dict = {}
+    for events_out_file in events_out_files:
+        for e in tf.train.summary_iterator(events_out_file):
+            for v in e.summary.value:
+                try:
+                    metrics_dict[v.tag].append(float('{:.7f}'.format(v.simple_value)))
+                except KeyError:
+                    metrics_dict[v.tag] = [float('{:.7f}'.format(v.simple_value))]
+    return metrics_dict

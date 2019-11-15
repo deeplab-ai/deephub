@@ -2,7 +2,7 @@ import click
 
 from deephub.trainer import Trainer
 from deephub.variants.io import (load_variant, UnknownVariant)
-
+from deephub.trainer.metrics import get_metrics_from_tensorboard
 
 import tensorflow as tf
 import os
@@ -38,20 +38,6 @@ def train_and_get_score(**params):
     variant_definition.train(trainer=trainer)
     metrics_dict = get_metrics_from_tensorboard(variant_definition.definition['model']['model_dir'])
 
-    return metrics_dict
-
-
-def get_metrics_from_tensorboard(model_dir):
-    # Parse events out tensorboard files
-    events_out_files = [os.path.join(model_dir, 'eval', x) for x in os.listdir(os.path.join(model_dir, 'eval'))]
-    metrics_dict = {}
-    for events_out_file in events_out_files:
-        for e in tf.train.summary_iterator(events_out_file):
-            for v in e.summary.value:
-                try:
-                    metrics_dict[v.tag].append(float('{:.7f}'.format(v.simple_value)))
-                except KeyError:
-                    metrics_dict[v.tag] = [float('{:.7f}'.format(v.simple_value))]
     return metrics_dict
 
 
