@@ -4,9 +4,6 @@ from deephub.trainer import Trainer
 from deephub.variants.io import (load_variant, UnknownVariant)
 from deephub.trainer.metrics import get_metrics_from_tensorboard
 
-import tensorflow as tf
-import os
-
 
 def train_and_get_score(**params):
 
