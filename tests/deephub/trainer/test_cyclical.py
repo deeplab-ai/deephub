@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import math
-from deephub.trainer.schedulers import cyclical_learning_rate
+from deephub.trainer.scheduling import cyclical_learning_rate
 
 
 class TestCyclical:
