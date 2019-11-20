@@ -8,11 +8,6 @@ from deephub.common.utils import hash_from_dict
 from pathlib import Path
 
 
-class _NoValue:
-    pass
-
-
-_NoValue = _NoValue()
 
 
 class HptParamSpec:
@@ -36,7 +31,7 @@ class HptParamSpec:
     def __init__(self,
                  name: str,
                  type: ParamType,
-                 constant: Any = _NoValue,
+                 constant: Any = None,
                  min: Optional[float] = None,
                  max: Optional[float] = None,
                  choices: Optional[List] = None,
@@ -95,7 +90,7 @@ class HptParamSpec:
     @property
     def is_constant(self) -> bool:
         """Check if this parameter is a constant"""
-        return self.constant is not _NoValue
+        return self.constant is not None
 
     def create_hp_variable(self):
         """
@@ -169,7 +164,6 @@ class TuningPlan:
                  goal: Goal,
                  objective: Callable,
                  params_specs: List[HptParamSpec],
-                 # hpt_folder: Path,
                  metric: Optional[str] = None,
                  max_trials: Optional[int] = None,
                  trial_id_argument: Optional[str] = None,
@@ -192,6 +186,7 @@ class TuningPlan:
         self.params_specs = params_specs
         self.max_trials = max_trials
         self.trial_id_argument = trial_id_argument
+
         # self.hpt_folder = hpt_folder
 
     @classmethod
