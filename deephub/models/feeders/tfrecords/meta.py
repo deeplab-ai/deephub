@@ -54,9 +54,11 @@ class TFRecordFileInfo:
 
         """
         file_size = fpath.stat().st_size
+        compression = 'GZIP' if fpath.suffix=='.gz' else ''
         meta_info = cls(full_path=fpath.resolve(),
                         md5_hash=file_md5(fpath),
-                        total_records=sum(1 for _ in tf.python_io.tf_record_iterator(path=str(fpath))),
+                        total_records=sum(1 for _ in tf.python_io.tf_record_iterator(path=str(fpath),
+                                                        options=tf.io.TFRecordOptions(compression_type=compression))),
                         file_size=file_size
                         )
 

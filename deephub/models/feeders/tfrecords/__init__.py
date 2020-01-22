@@ -232,9 +232,11 @@ class TFRecordExamplesFeeder(FeederBase):
     def get_tf_dataset(self, epochs: Optional[int] = None) -> tf.data.Dataset:
         if self.max_examples == -1:
             raw_records = tf.data.TFRecordDataset(list(map(str, self.file_paths)),
+                                                  compression_type=self._get_file_paths_extension(),
                                                   num_parallel_reads=self.num_parallel_reads)
         else:
             raw_records = tf.data.TFRecordDataset(list(map(str, self.file_paths)),
+                                                  compression_type=self._get_file_paths_extension(),
                                                   num_parallel_reads=self.num_parallel_reads). \
                 take(count=self.total_examples)
         examples = raw_records.map(self._parse_example, num_parallel_calls=self.num_parallel_maps)
@@ -245,6 +247,14 @@ class TFRecordExamplesFeeder(FeederBase):
         batches = examples.batch(batch_size=self.batch_size, drop_remainder=self.drop_remainder)
         # buffer_size=None is autotuning the appropriate prefetching buffer size
         return batches.prefetch(buffer_size=self.prefetch)
+
+    def _get_file_paths_extension(self):
+        extension = self.file_paths[0].suffix
+        for f in self.file_paths:
+            if f.suffix != extension:
+                raise ValueError('All files must have the same extension')
+
+        return 'GZIP' if extension=='.gz' else ''
 
     def total_steps(self, epochs: int) -> Optional[int]:
         if self.total_examples is None:

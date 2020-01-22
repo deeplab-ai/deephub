@@ -25,7 +25,7 @@ As an example, to train a `toy` network using a toy dataset you run the followin
 $ deep -l DEBUG trainer train toy \
 -p model.model_dir /AnyPath \
 -p train.train_feeder.file_patterns deephub/resources/blobs/data/toy/train-* \ 
--c train.eval_feeder.file_patterns deephub/resources/blobs/data/toy/validation-* \
+-p train.eval_feeder.file_patterns deephub/resources/blobs/data/toy/validation-* \
 ```
 
 For more information about the parameters like gpu pinning etc you can use the `--help` option.
