@@ -16,3 +16,4 @@ train:
         class_type: FixedLenFeature
         shape: [1]
         dtype: int64
+    compression: ''
