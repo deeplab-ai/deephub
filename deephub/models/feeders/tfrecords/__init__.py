@@ -44,7 +44,8 @@ class TFRecordExamplesFeeder(FeederBase):
                  num_parallel_maps: Optional[int] = None,
                  num_parallel_reads: Optional[int] = 32,
                  prefetch: Optional[int] = None,
-                 auto_generate_meta: bool = False):
+                 auto_generate_meta: bool = False,
+                 compression: str = ''):
         """
         Initialize the feeder
 
@@ -69,7 +70,10 @@ class TFRecordExamplesFeeder(FeederBase):
         :param auto_generate_meta: If true the feeder will generate metadata for each tfrecord that does not
             have. WARNING: This process may take a long time depending the size of the file and you need to make
             sure that you have write access to the same folder as the tfrecord files.
+        :param compression: This specifies the compression of the tfrecord file.
+             Options are: empty string, '', for no compression or 'GZIP' for gzip compression.
         """
+        self.compression = compression
         if not isinstance(file_patterns, (list, tuple)):
             file_patterns = (file_patterns,)
         self.file_patterns = file_patterns
@@ -127,13 +131,14 @@ class TFRecordExamplesFeeder(FeederBase):
     def total_examples(self) -> Optional[int]:
         """The total number of examples that was found in input files"""
         if self.auto_generate_meta:
-            info_f = generate_fileinfo
+            total_examples = sum(
+                generate_fileinfo(fpath, compression_type=self.compression).total_records
+                for fpath in self.file_paths
+            )
         else:
-            info_f = get_fileinfo
-
-        total_examples = sum(
-            info_f(fpath).total_records
-            for fpath in self.file_paths
+            total_examples = sum(
+                get_fileinfo(fpath).total_records
+                for fpath in self.file_paths
             )
 
         if self.max_examples > total_examples:
@@ -231,10 +236,10 @@ class TFRecordExamplesFeeder(FeederBase):
 
     def get_tf_dataset(self, epochs: Optional[int] = None) -> tf.data.Dataset:
         if self.max_examples == -1:
-            raw_records = tf.data.TFRecordDataset(list(map(str, self.file_paths)),
+            raw_records = tf.data.TFRecordDataset(list(map(str, self.file_paths)), compression_type=self.compression,
                                                   num_parallel_reads=self.num_parallel_reads)
         else:
-            raw_records = tf.data.TFRecordDataset(list(map(str, self.file_paths)),
+            raw_records = tf.data.TFRecordDataset(list(map(str, self.file_paths)), compression_type=self.compression,
                                                   num_parallel_reads=self.num_parallel_reads). \
                 take(count=self.total_examples)
         examples = raw_records.map(self._parse_example, num_parallel_calls=self.num_parallel_maps)
