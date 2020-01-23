@@ -19,7 +19,10 @@ def cli():
 @click.option('--force', is_flag=True, default=False,
               help='It will forcefully regenerate meta data even for tfrecords that'
                    'have not changed.')
-def generate_metadata(pattern, force):
+@click.option('--compression_type', type=str, default='', help="""Compression type of the tfrecord file. Options:
+                                                               ''     for no compression
+                                                               'GZIP' for gzip compression""")
+def generate_metadata(pattern, force, compression_type):
     """
     Generate metadata for tfrecord files.
 
@@ -36,7 +39,7 @@ def generate_metadata(pattern, force):
     with click.progressbar(files) as files:
         for fpath in files:
             try:
-                generate_fileinfo(fpath)
+                generate_fileinfo(fpath, compression_type=compression_type)
             except Exception as e:
                 click.echo(f'Skipping file {fpath} because of: {e!s}')
     click.echo('Finished generating metadata')

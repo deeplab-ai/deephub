@@ -47,18 +47,17 @@ class TFRecordFileInfo:
     meta: int = attr.ib(factory=dict)
 
     @classmethod
-    def generate_for(cls, fpath: Path) -> 'TFRecordFileInfo':
+    def generate_for(cls, fpath: Path, compression_type: str) -> 'TFRecordFileInfo':
         """
         Generate initial metadata from an existing tf record file
         :param fpath: The path to the file
 
         """
         file_size = fpath.stat().st_size
-        compression = 'GZIP' if fpath.suffix=='.gz' else ''
         meta_info = cls(full_path=fpath.resolve(),
                         md5_hash=file_md5(fpath),
                         total_records=sum(1 for _ in tf.python_io.tf_record_iterator(path=str(fpath),
-                                                        options=tf.io.TFRecordOptions(compression_type=compression))),
+                                                    options=tf.io.TFRecordOptions(compression_type=compression_type))),
                         file_size=file_size
                         )
 
@@ -207,7 +206,7 @@ def get_fileinfo(fpath: Path, shallow_check: bool = True) -> TFRecordFileInfo:
     return info
 
 
-def generate_fileinfo(fpath: Path, always_regenerate: bool = False) -> TFRecordFileInfo:
+def generate_fileinfo(fpath: Path, always_regenerate: bool = False, compression_type: str = '') -> TFRecordFileInfo:
     """
     Generate file info for a file if it does not exist.
     :param fpath: The path of the filename to generate info
@@ -229,7 +228,7 @@ def generate_fileinfo(fpath: Path, always_regenerate: bool = False) -> TFRecordF
             raise TFRecordValidationError()
         info.validate(shallow_check=False)
     except (TFRecordInfoMissingError, TFRecordValidationError):
-        info = TFRecordFileInfo.generate_for(fpath)
+        info = TFRecordFileInfo.generate_for(fpath, compression_type)
 
     # Update metadata
     metadata[fpath.name] = info

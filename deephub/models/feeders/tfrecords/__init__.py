@@ -45,7 +45,7 @@ class TFRecordExamplesFeeder(FeederBase):
                  num_parallel_reads: Optional[int] = 32,
                  prefetch: Optional[int] = None,
                  auto_generate_meta: bool = False,
-                 compression: str = 'GZIP'):
+                 compression: str = ''):
         """
         Initialize the feeder
 
@@ -70,7 +70,10 @@ class TFRecordExamplesFeeder(FeederBase):
         :param auto_generate_meta: If true the feeder will generate metadata for each tfrecord that does not
             have. WARNING: This process may take a long time depending the size of the file and you need to make
             sure that you have write access to the same folder as the tfrecord files.
+        :param compression: This specifies the compression of the tfrecord file.
+             Options are: empty string, '', for no compression or 'GZIP' for gzip compression.
         """
+        self.compression = compression
         if not isinstance(file_patterns, (list, tuple)):
             file_patterns = (file_patterns,)
         self.file_patterns = file_patterns
@@ -111,7 +114,6 @@ class TFRecordExamplesFeeder(FeederBase):
         self.num_parallel_maps = num_parallel_maps
         self.prefetch = prefetch
         self.drop_remainder = drop_remainder
-        self.compression = compression
 
     @property
     @lru_cache()
@@ -129,13 +131,14 @@ class TFRecordExamplesFeeder(FeederBase):
     def total_examples(self) -> Optional[int]:
         """The total number of examples that was found in input files"""
         if self.auto_generate_meta:
-            info_f = generate_fileinfo
+            total_examples = sum(
+                generate_fileinfo(fpath, compression_type=self.compression).total_records
+                for fpath in self.file_paths
+            )
         else:
-            info_f = get_fileinfo
-
-        total_examples = sum(
-            info_f(fpath).total_records
-            for fpath in self.file_paths
+            total_examples = sum(
+                get_fileinfo(fpath).total_records
+                for fpath in self.file_paths
             )
 
         if self.max_examples > total_examples:
