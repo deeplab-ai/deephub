@@ -8,7 +8,6 @@ from deephub.models import ModelBase
 from deephub.models.feeders import FeederBase
 from .metrics import export_metrics
 from .exporters import BestCheckpointCopier
-from p13n.train_serve.model_pipelines.graph_builder_interfaces.tf_record_graph_interface import _FEATURES
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +169,7 @@ class Trainer:
                 hooks=hooks
             )
 
-            exporter = [BestCheckpointCopier(name='best_checkpoint', checkpoints_to_keep=5, score_metric='loss')]
+            exporter = [BestCheckpointCopier(name='best_checkpoints', checkpoints_to_keep=5, score_metric='loss')]
 
             if use_best_exporter:
                 assert hasattr(model, 'serving_input_receiver_fn')
