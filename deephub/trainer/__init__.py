@@ -7,6 +7,8 @@ import tensorflow as tf
 from deephub.models import ModelBase
 from deephub.models.feeders import FeederBase
 from .metrics import export_metrics
+from .exporters import BestCheckpointCopier
+from p13n.train_serve.model_pipelines.graph_builder_interfaces.tf_record_graph_interface import _FEATURES
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +95,8 @@ class Trainer:
               early_stopping_metric: Optional[str] = None,
               early_stopping_steps_without_decrease: Optional[int] = None,
               early_stopping_min_steps: Optional[int] = 1,
-              early_stopping_hook_run_every_steps: Optional[int] = None) -> None:
+              early_stopping_hook_run_every_steps: Optional[int] = None,
+              use_best_exporter: Optional[bool] = False) -> None:
         """
         Train a model given an existing train feeder and optionally an evaluation feeder.
 
@@ -131,6 +134,8 @@ class Trainer:
                                          stopping criteria condition has been met.
         :param early_stopping_hook_run_every_steps: How often will the early stopping condition is checked. With the
                                                     default value (None) the hook will be executed once every epoch.
+        :param use_best_exporter: Whether or not to use best_exporter to save the model. This requires that the model
+                                                                has a serving_input_receiver_fn method implemented.
         """
         warm_start_settings = self._get_warm_start_settings(warm_start_check_point, warm_start_variables_regex)
         extra_run_config_params = self._get_extra_run_config_params(
@@ -165,12 +170,24 @@ class Trainer:
                 hooks=hooks
             )
 
+            exporter = [BestCheckpointCopier(name='best_checkpoint', checkpoints_to_keep=5, score_metric='loss')]
+
+            if use_best_exporter:
+                assert hasattr(model, 'serving_input_receiver_fn')
+                exporter.extend([tf.estimator.BestExporter(name='best_export',
+                                                           serving_input_receiver_fn=model.serving_input_receiver_fn,
+                                                           ),
+                                 tf.estimator.FinalExporter(name='final_export',
+                                                            serving_input_receiver_fn=model.serving_input_receiver_fn,
+                                                            )
+                                 ])
+
             eval_spec = tf.estimator.EvalSpec(
                 input_fn=eval_feeder.get_input_fn(epochs=1),
                 throttle_secs=validation_secs,
-                steps=eval_feeder.total_steps(epochs=1)  # As evaluation is executed on 1 device (Only train_distribute
-                                                         # has been declared in tf.contrib.distribute.DistributeConfig),
-                                                         # se there is no need to divide with the number of devices.
+                steps=eval_feeder.total_steps(epochs=1),  # As evaluation is executed on 1 device (Only train_distribute
+                exporters=exporter  # has been declared in tf.contrib.distribute.DistributeConfig),
+                # se there is no need to divide with the number of devices.
             )
 
             tf.estimator.train_and_evaluate(estimator, train_spec=train_spec, eval_spec=eval_spec)
