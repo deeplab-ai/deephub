@@ -10,6 +10,25 @@ train:
 #      save_checkpoint_secs: 1
   validation_secs: 3600
   save_summary_steps: 1
+  exporters:
+    best_exporter:
+      module_path: 'tensorflow.estimator'
+      class_type: 'BestExporter'
+      name: 'best_export'
+      serving_feeder: $(train.train_feeder)
+      serving_input_receiver_fn: 'serving_input_receiver_fn' #has to be method of serving_feeder
+    final_exporter:
+      module_path: 'tensorflow.estimator'
+      class_type: 'FinalExporter'
+      name: 'final_export'
+      serving_feeder: $(train.exporters.best_exporter.serving_feeder)
+      serving_input_receiver_fn: $(train.exporters.best_exporter.serving_input_receiver_fn)
+    best_checkpoint_exporter:
+      module_path: 'deephub.trainer.exporters'
+      class_type: 'BestCheckpointCopier'
+      name: 'best_checkpoints'
+      score_metric: 'loss'
+      checkpoints_to_keep: 1
 extend:
   - ../feeders/feeder_toy_train.yaml
   - ../feeders/feeder_toy_eval.yaml
