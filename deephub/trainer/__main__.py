@@ -117,7 +117,7 @@ def train(variant_name, variants_dir, gpu_device_ids, extra_expr_params, extra_s
 
     # avoid passing "-1" with the regular arguments.
     if len(gpu_device_ids) == 1 and gpu_device_ids[0] == -1:
-        gpu_device_ids = tuple(find_idle_gpu_devices())
+        gpu_device_ids = find_idle_gpu_devices()
         trainer = Trainer(requested_gpu_devices=gpu_device_ids)
     else:
         trainer = Trainer(requested_gpu_devices=gpu_device_ids)
