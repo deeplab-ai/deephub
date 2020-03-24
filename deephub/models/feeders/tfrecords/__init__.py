@@ -259,3 +259,11 @@ class TFRecordExamplesFeeder(FeederBase):
                 return int(np.floor((self.total_examples / self.batch_size) * epochs))
             else:
                 return int(np.ceil((self.total_examples / self.batch_size) * epochs))
+
+    def serving_input_receiver_fn(self):
+        serialized_tf_example = tf.compat.v1.placeholder(dtype=tf.string,
+                                                         shape=[],
+                                                         name='input_example_tensor')
+        features, _ = self._parse_example(serialized_tf_example)
+        features = {k:tf.reshape(features[k],[-1,1]) for k in features.keys()}
+        return tf.estimator.export.ServingInputReceiver(features=features, receiver_tensors=serialized_tf_example)

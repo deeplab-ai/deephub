@@ -3,14 +3,14 @@ import logging
 import os
 import yaml
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Callable
 
-from deephub.common.modules import instantiate_from_dict
+from deephub.common.modules import instantiate_from_dict, import_object
 from deephub.common.utils import deep_update_dict
 from deephub.models import ModelBase
 from deephub.models.feeders import FeederBase
 from deephub.trainer import Trainer
-
+from tensorflow.estimator import Exporter
 logger = logging.getLogger(__name__)
 
 
@@ -148,7 +148,7 @@ class VariantDefinition:
         elif self.has('train.eval_feeder'):
             search_modules = [self.get('train.eval_feeder.module_path')]
         elif self.has('predict.predict_feeder'):
-            search_modules = [self.get('predict.predict_feeder')]
+            search_modules = [self.get('predict.predict_feeder.module_path')]
         else:
             raise ValueError('Variant must have one of the following: \n ' +
                              'train.train_feeder, train.eval_feeder, predict.predict_feeder')
@@ -163,6 +163,31 @@ class VariantDefinition:
             logger.warn(f"Class '{feeder.__class__.__name__}' that is used as feeder "
                         f"type is not subclass of FeederBase.")
         return feeder
+
+    def create_exporters(self, exporters_config_path: str) -> List[Exporter]:
+        """
+        Create a fresh Feeder object instance based on the definition of the variant.
+
+        :param exporters_config_path: A dot-separated path in the variant definition
+            that holds the exporter configuration. Usually a value of `train.exporters`
+
+        :return: The instantiated Exporter object
+        """
+        exporters_dict = self.get(exporters_config_path)
+        exporters = []
+
+        for k in exporters_dict.keys():
+            e = exporters_dict[k]
+
+            if 'serving_input_receiver_fn' in e.keys():
+                feeder = self.create_feeder(f'train.exporters.{k}.serving_feeder')
+                serving_input_receiver_fn = getattr(feeder, e['serving_input_receiver_fn'])
+                e['serving_input_receiver_fn'] = serving_input_receiver_fn
+
+            exporters.append(instantiate_from_dict(e,search_modules=[e['module_path']],
+                                                   exclude_keys=['module_path', 'serving_feeder']))
+
+        return exporters
 
     def train(self, trainer: Trainer) -> ModelBase:
         """
@@ -182,13 +207,17 @@ class VariantDefinition:
             eval_feeder = self.create_feeder('train.eval_feeder')
         else:
             eval_feeder = None
-
+        if self.has('train.exporters'):
+            exporters = self.create_exporters('train.exporters')
+        else:
+            exporters = None
         # Dump model and train params from variants yaml
         self._dump_variant_definition()
 
         # Invoke training
-        train_params = self.sub_get('train', exclude_keys=['train_feeder', 'eval_feeder'])
-        trainer.train(model=model, train_feeder=train_feeder, eval_feeder=eval_feeder, **train_params)
+        train_params = self.sub_get('train', exclude_keys=['train_feeder', 'eval_feeder', 'exporters'])
+        trainer.train(model=model, train_feeder=train_feeder, eval_feeder=eval_feeder,
+                      exporters=exporters, **train_params)
 
         return model
 

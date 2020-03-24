@@ -7,7 +7,7 @@ import tensorflow as tf
 from deephub.models import ModelBase
 from deephub.models.feeders import FeederBase
 from .metrics import export_metrics
-
+from .exporters import BestCheckpointCopier
 logger = logging.getLogger(__name__)
 
 
@@ -93,7 +93,8 @@ class Trainer:
               early_stopping_metric: Optional[str] = None,
               early_stopping_steps_without_decrease: Optional[int] = None,
               early_stopping_min_steps: Optional[int] = 1,
-              early_stopping_hook_run_every_steps: Optional[int] = None) -> None:
+              early_stopping_hook_run_every_steps: Optional[int] = None,
+              exporters: Optional[List[tf.estimator.Exporter]] = None) -> None:
         """
         Train a model given an existing train feeder and optionally an evaluation feeder.
 
@@ -131,6 +132,7 @@ class Trainer:
                                          stopping criteria condition has been met.
         :param early_stopping_hook_run_every_steps: How often will the early stopping condition is checked. With the
                                                     default value (None) the hook will be executed once every epoch.
+        :param exporters: List of exporters to be used by the estimator evalspec.
         """
         warm_start_settings = self._get_warm_start_settings(warm_start_check_point, warm_start_variables_regex)
         extra_run_config_params = self._get_extra_run_config_params(
@@ -168,9 +170,9 @@ class Trainer:
             eval_spec = tf.estimator.EvalSpec(
                 input_fn=eval_feeder.get_input_fn(epochs=1),
                 throttle_secs=validation_secs,
-                steps=eval_feeder.total_steps(epochs=1)  # As evaluation is executed on 1 device (Only train_distribute
-                                                         # has been declared in tf.contrib.distribute.DistributeConfig),
-                                                         # se there is no need to divide with the number of devices.
+                steps=eval_feeder.total_steps(epochs=1),  # As evaluation is executed on 1 device (Only train_distribute
+                exporters=exporters                       # has been declared in tf.contrib.distribute.DistributeConfig),
+                                                          # so there is no need to divide with the number of devices.
             )
 
             tf.estimator.train_and_evaluate(estimator, train_spec=train_spec, eval_spec=eval_spec)
