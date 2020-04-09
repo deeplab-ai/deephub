@@ -1,12 +1,11 @@
 from __future__ import absolute_import
 
 import hashlib
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 from pathlib import Path
-
 import ujson as json
-
 from tensorflow.python.platform import gfile
+import yaml
 
 AnyPathType = Union[Path, str]
 
@@ -95,3 +94,8 @@ def resolve_glob_pattern(pattern: str, starting_folder: Optional[AnyPathType] = 
         matches = filter(lambda p: not p.is_dir(), matches)
 
     return list(matches)
+
+
+def load_yaml(fname: AnyPathType) -> Dict:
+    with open(fname, mode='rt', encoding='utf8') as f:
+        return yaml.load(f, Loader=yaml.Loader)
